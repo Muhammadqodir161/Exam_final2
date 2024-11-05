@@ -20,3 +20,14 @@ class PostListView(ListView):
     template_name = 'post_list.html'
     context_object_name = 'posts'
     ordering = ['-created_at']
+    
+class PostDetailView(DetailView):
+    model = Post
+    template_name = 'post_detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['comments'] = Comment.objects.filter(post=self.object)
+        if self.request.user.is_authenticated:
+            context['comment_form'] = CommentForm()
+        return context
