@@ -44,4 +44,12 @@ class Comment(models.Model):
 
     def str(self):
         return f'Comment by {self.author} on {self.post}'
+    
+class Subscription(models.Model):
+    follower = models.ForeignKey(User, on_delete=models.CASCADE, related_name='following_set')
+    following = models.ForeignKey(User, on_delete=models.CASCADE, related_name='followers_set')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def str(self):
+        return f'{self.follower} follows {self.following}'
 
