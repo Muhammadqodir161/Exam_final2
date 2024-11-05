@@ -119,3 +119,15 @@ class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     def test_func(self):
         comment = self.get_object()
         return self.request.user == comment.author
+    
+class NotificationListView(LoginRequiredMixin, ListView):
+    model = Notification
+    template_name = 'notifications.html'
+    context_object_name = 'notifications'
+
+    def get_queryset(self):
+        return Notification.objects.filter(user=self.request.user).order_by('-created_at')
+
+    def post(self, request, *args, **kwargs):
+        Notification.objects.filter(user=self.request.user, is_read=False).update(is_read=True)
+        return redirect('notifications')
