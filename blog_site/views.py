@@ -95,3 +95,27 @@ class FollowToggleView(LoginRequiredMixin, DetailView):
                 profile.followers.add(request.user)
                 Notification.objects.create(user=profile.user, notif_type='follow', from_user=request.user)
         return redirect('profile', username=profile.user.username)
+    
+class CommentCreateView(LoginRequiredMixin, CreateView):
+    model = Comment
+    form_class = CommentForm
+    template_name = 'comment_form.html'
+
+    def form_valid(self, form):
+        form.instance.author = self.request.user
+        form.instance.post = get_object_or_404(Post, pk=self.kwargs['pk'])
+        response = super().form_valid(form)
+        Notification.objects.create(user=form.instance.post.author, notif_type='comment', from_user=self.request.user,
+                                    post=form.instance.post)
+        return response
+
+
+class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = Comment
+
+    def get_success_url(self):
+        return reverse_lazy('post_detail', kwargs={'pk': self.object.post.pk})
+
+    def test_func(self):
+        comment = self.get_object()
+        return self.request.user == comment.author
