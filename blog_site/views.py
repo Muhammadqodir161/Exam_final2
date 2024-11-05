@@ -14,3 +14,9 @@ class HomePageView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         return Post.objects.filter(author__profile__followers=self.request.user.profile).order_by('-created_at')
+
+class PostListView(ListView):
+    model = Post
+    template_name = 'post_list.html'
+    context_object_name = 'posts'
+    ordering = ['-created_at']
