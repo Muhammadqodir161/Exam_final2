@@ -74,3 +74,11 @@ class ProfileView(DetailView):
         context = super().get_context_data(**kwargs)
         context['posts'] = Post.objects.filter(author=self.get_object().user)
         return context
+
+class ProfileUpdateView(LoginRequiredMixin, UpdateView):
+    model = Profile
+    form_class = ProfileForm
+    template_name = 'profile_form.html'
+
+    def get_object(self):
+        return self.request.user.profile
