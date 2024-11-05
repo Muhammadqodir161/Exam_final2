@@ -82,3 +82,16 @@ class ProfileUpdateView(LoginRequiredMixin, UpdateView):
 
     def get_object(self):
         return self.request.user.profile
+    
+class FollowToggleView(LoginRequiredMixin, DetailView):
+    model = Profile
+
+    def get(self, request, *args, **kwargs):
+        profile = get_object_or_404(Profile, user__username=kwargs['username'])
+        if profile.user != request.user:
+            if request.user in profile.followers.all():
+                profile.followers.remove(request.user)
+            else:
+                profile.followers.add(request.user)
+                Notification.objects.create(user=profile.user, notif_type='follow', from_user=request.user)
+        return redirect('profile', username=profile.user.username)
