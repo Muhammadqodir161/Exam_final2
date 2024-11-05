@@ -61,3 +61,16 @@ class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     def test_func(self):
         post = self.get_object()
         return self.request.user == post.author
+
+class ProfileView(DetailView):
+    model = Profile
+    template_name = 'profile.html'
+
+    def get_object(self):
+        username = self.kwargs.get('username')
+        return get_object_or_404(Profile, user__username=username)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['posts'] = Post.objects.filter(author=self.get_object().user)
+        return context
