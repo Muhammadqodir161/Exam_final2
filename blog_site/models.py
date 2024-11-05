@@ -6,21 +6,16 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 class Profile(models.Model):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    following = models.ManyToManyField(
-        'self',
-        symmetrical=False,
-        related_name='followers',
-        blank=True
-    )
-    profile_image = models.ImageField(
-        upload_to='profile_images/',
-        default='profile_images/default.jpg',
-        blank=True
-    )
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
+    bio = models.TextField(max_length=500, blank=True)
+    followers = models.ManyToManyField('self', symmetrical=False, related_name='following', blank=True)
 
-    def __str__(self):
-        return f"{self.user.username}'s profile"
+    def str(self):
+        return f'{self.user.username} Profile'
+
+    def get_absolute_url(self):
+        return reverse('profile', kwargs={'username': self.user.username})
     
 class Post(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')
