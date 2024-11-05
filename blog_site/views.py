@@ -31,3 +31,12 @@ class PostDetailView(DetailView):
         if self.request.user.is_authenticated:
             context['comment_form'] = CommentForm()
         return context
+    
+class PostCreateView(LoginRequiredMixin, CreateView):
+    model = Post
+    form_class = PostForm
+    template_name = 'post_form.html'
+
+    def form_valid(self, form):
+        form.instance.author = self.request.user
+        return super().form_valid(form)
