@@ -18,8 +18,6 @@ urlpatterns = [
     path('post/<int:pk>/comment/', CommentCreateView.as_view(), name='comment_create'),
     path('comment/<int:pk>/delete/', CommentDeleteView.as_view(), name='comment_delete'),
     path('notifications/', NotificationListView.as_view(), name='notifications'),
-    
-    
     path('login/', CustomLoginView.as_view(), name='login'),
     path('register/', RegisterView.as_view(), name='register'),  
     path('logout/', LogoutView.as_view(next_page='home'), name='logout'), 
