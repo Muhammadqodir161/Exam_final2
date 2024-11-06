@@ -1,10 +1,35 @@
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.models import User
 from .models import Profile, Post, Comment, Subscription, Notification
 from .forms import PostForm, CommentForm, ProfileForm
+from django.contrib.auth.views import LoginView
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import login
+from django.contrib import messages
+
+
+def register(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect('home') 
+    else:
+        form = UserCreationForm()
+    return render(request, 'register.html', {'form': form})
+
+
+class RegisterView(CreateView):
+    form_class = UserCreationForm
+    template_name = 'register.html'
+    success_url = reverse_lazy('home')
+
+class CustomLoginView(LoginView):
+    template_name = 'login.html'  
 
 
 class HomePageView(LoginRequiredMixin, ListView):
@@ -15,12 +40,19 @@ class HomePageView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         return Post.objects.filter(author__profile__followers=self.request.user.profile).order_by('-created_at')
 
-class PostListView(ListView):
+class PostViewWithoutLogin(ListView):
     model = Post
-    template_name = 'post_list.html'
+    template_name = 'index-without-login.html'
     context_object_name = 'posts'
     ordering = ['-created_at']
-    
+
+class PostListView(ListView):
+    model = Post
+    template_name = 'all-posts.html'
+    context_object_name = 'posts'
+    ordering = ['-created_at']
+
+
 class PostDetailView(DetailView):
     model = Post
     template_name = 'post_detail.html'
@@ -31,7 +63,8 @@ class PostDetailView(DetailView):
         if self.request.user.is_authenticated:
             context['comment_form'] = CommentForm()
         return context
-    
+
+
 class PostCreateView(LoginRequiredMixin, CreateView):
     model = Post
     form_class = PostForm
@@ -40,6 +73,7 @@ class PostCreateView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         form.instance.author = self.request.user
         return super().form_valid(form)
+
 
 class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Post
@@ -53,7 +87,8 @@ class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     def test_func(self):
         post = self.get_object()
         return self.request.user == post.author
-    
+
+
 class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Post
     success_url = reverse_lazy('post_list')
@@ -61,6 +96,7 @@ class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     def test_func(self):
         post = self.get_object()
         return self.request.user == post.author
+
 
 class ProfileView(DetailView):
     model = Profile
@@ -75,6 +111,7 @@ class ProfileView(DetailView):
         context['posts'] = Post.objects.filter(author=self.get_object().user)
         return context
 
+
 class ProfileUpdateView(LoginRequiredMixin, UpdateView):
     model = Profile
     form_class = ProfileForm
@@ -82,7 +119,8 @@ class ProfileUpdateView(LoginRequiredMixin, UpdateView):
 
     def get_object(self):
         return self.request.user.profile
-    
+
+
 class FollowToggleView(LoginRequiredMixin, DetailView):
     model = Profile
 
@@ -95,7 +133,8 @@ class FollowToggleView(LoginRequiredMixin, DetailView):
                 profile.followers.add(request.user)
                 Notification.objects.create(user=profile.user, notif_type='follow', from_user=request.user)
         return redirect('profile', username=profile.user.username)
-    
+
+
 class CommentCreateView(LoginRequiredMixin, CreateView):
     model = Comment
     form_class = CommentForm
@@ -119,7 +158,8 @@ class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     def test_func(self):
         comment = self.get_object()
         return self.request.user == comment.author
-    
+
+
 class NotificationListView(LoginRequiredMixin, ListView):
     model = Notification
     template_name = 'notifications.html'
