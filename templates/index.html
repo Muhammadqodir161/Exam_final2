@@ -29,15 +29,15 @@
             <div class="pt-2 pb-3 space-y-1">
                 <a href="/"
                     class="border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">Home</a>
-                <a href=" /all-posts.html"
+                <a href="{% url 'post_list' %}"
                     class="border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">All
                     Posts</a>
-                <a href="/create-post.html"
+                <a href="{% url 'post_create' %}"
                     class="border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">Create
                     Post</a>
-                <a href="/login.html"
+                <a href="{% url 'login' %}"
                     class="border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">Login</a>
-                <a href="/register.html"
+                <a href="{% url 'register' %}"
                     class="border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">Register</a>
             </div>
 
