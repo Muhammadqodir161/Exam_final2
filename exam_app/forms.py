@@ -3,10 +3,26 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from .models import Post, Comment, Profile
 
+
+class UserRegisterForm(UserCreationForm):
+    email = forms.EmailField(required=True)
+
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'password1', 'password2']
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if User.objects.filter(email=email).exists():
+            raise forms.ValidationError("This email address is already in use.")
+        return email
+
+
 class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
         fields = ['user', 'avatar', 'bio']
+
 
 class PostForm(forms.ModelForm):
     class Meta:
@@ -32,6 +48,7 @@ class PostForm(forms.ModelForm):
                 raise forms.ValidationError("Uploaded file must be an image.")
         return image
 
+
 class CommentForm(forms.ModelForm):
     class Meta:
         model = Comment
@@ -42,17 +59,3 @@ class CommentForm(forms.ModelForm):
         if not content or content.strip() == "":
             raise forms.ValidationError("Comment cannot be empty.")
         return content
-
-class UserRegisterForm(UserCreationForm):
-    email = forms.EmailField(required=True)
-
-    class Meta:
-        model = User
-        fields = ['username', 'email', 'password1', 'password2']
-
-    def clean_email(self):
-        email = self.cleaned_data.get('email')
-        if User.objects.filter(email=email).exists():
-            raise forms.ValidationError("This email address is already in use.")
-        return email
-    
